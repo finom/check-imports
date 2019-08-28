@@ -1,6 +1,6 @@
 {
   "name": "check-imports",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Checks imports and updates package.json dependencies",
   "main": "api.js",
   "bin": {
@@ -15,8 +15,8 @@
   "author": "Andrey Gubanov",
   "license": "MIT",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/finom/check-imports"
+    "type": "git",
+    "url": "https://github.com/finom/check-imports"
   },
   "dependencies": {
     "@babel/parser": "^7.5.5",
