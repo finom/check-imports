@@ -4,7 +4,10 @@ import { connect } from 'react-redux';
 import 'redux';
 import SomeComponent from './SomeComponent'
 import { on } from 'defi';
-import 'azaza-lol-foo-bar-baz'; // unexisting package
+import 'azaza-lol-bar'; // unexisting package
+
+import foo from 'azaza-lol-baz'; // check-imports-ignore-line
+
 
 window.jQuery = require('jquery');
 

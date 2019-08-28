@@ -1,9 +1,10 @@
 /* @flow */
-import moment from "moment";
+/* eslint-disable */
+import moment from 'moment';
 
 function foo(x: ?number): string {
   if (x) {
     return x;
   }
-  return "default string";
+  return 'default string';
 }

@@ -27,6 +27,12 @@ Install: `npm i -D check-imports` and use: `npx check-imports`.
 
 Note that after an update you still need to run `npm install` manually.
 
+A bonus: imports can be ignored directly in code via `check-imports-ignore-line` comment
+
+```js
+require('lodash'); // check-imports-ignore-line
+```
+
 ## CLI
 
 The tool can be run via `npx check-imports`.

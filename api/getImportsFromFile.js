@@ -48,9 +48,14 @@ async function getImportsFromFile({
     return [];
   }
 
+  const ignoredLines = parsed.comments
+    .filter(({ value }) => value.trim() === 'check-imports-ignore-line').map(({ loc }) => loc.start.line);
 
   traverse(parsed, {
     enter({ node }) {
+      if (ignoredLines.includes(node.loc.start.line)) {
+        return;
+      }
       // handle import
       if (node.type === 'ImportDeclaration') {
         imports.push(node.source.value);
