@@ -1,4 +1,4 @@
-# check-imports
+# check-imports [![npm version](https://badge.fury.io/js/check-imports.svg)](https://badge.fury.io/js/check-imports)
 
 Checks `import from` declarations, `import` and `require` calls then updates or removes package.json dependencies (if `update` option described below is set to `true`, otherwise you only get informed) from package.json files. Works great with single-package modules as well as with big projects with multiple package.json files (for example if you have a monorepo powered by [lerna](https://github.com/lerna/lerna)).
 
