@@ -46,6 +46,8 @@ function logResults(allResults, { update, throwError }) {
     } else {
       console.log('This package.json is fine, no need to update it');
     }
+
+    console.log('\n');
   }
 }
 
