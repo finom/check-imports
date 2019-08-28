@@ -24,6 +24,8 @@ async function getImportsFromFile({
     if (throwError) {
       throw e;
     }
+
+    return [];
   }
 
 
