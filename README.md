@@ -5,7 +5,7 @@ Checks `import from` declarations, `import` and `require` calls then updates or 
 ## TL;DR
 Install: `npm i -D check-imports` and use: `npx check-imports`.
 
-![](https://i.imgur.com/NNKg1de.png)
+![](https://i.imgur.com/NNKg1de.png =500x)
 
 ## How it works
 
