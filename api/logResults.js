@@ -30,7 +30,7 @@ function logResults(allResults, { update, throwError }) {
 
     if (added.length || removed.length) {
       if (!update) {
-        console.log('package.json can be automatically updated with the --update option');
+        console.log('This package.json can be automatically updated with the --update option');
       }
 
       if (throwError) {
