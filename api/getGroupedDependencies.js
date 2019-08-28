@@ -9,6 +9,8 @@ async function getGroupedDependencies({
   directoryPath,
   ignorePath,
   babelPlugins,
+  throwError,
+  log,
 }) {
   const filePaths = await glob(path.resolve(directoryPath, '**/*.{ts,js,jsx}'), {
     ignore: [
@@ -33,7 +35,9 @@ async function getGroupedDependencies({
     groupedDependencies[packagePath] = deps;
 
     for (const filePath of Object.keys(filesGroup)) {
-      const imports = await getImportsFromFile({ filePath, babelPlugins });
+      const imports = await getImportsFromFile({
+        filePath, babelPlugins, throwError, log,
+      });
 
       for (const imp of imports) {
         deps[imp] = true;

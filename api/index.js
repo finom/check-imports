@@ -14,7 +14,7 @@ async function checkImports({
   babelPlugins = defaultBabelPlugins,
 } = {}) {
   const groupedDependencies = await getGroupedDependencies({
-    directoryPath, ignorePath, babelPlugins,
+    directoryPath, ignorePath, babelPlugins, throwError, log,
   });
   const results = [];
 

@@ -1,16 +1,31 @@
 const { builtinModules } = require('module');
 const fs = require('fs').promises;
+const chalk = require('chalk');
 const babelParser = require('@babel/parser');
 const { default: traverse } = require('@babel/traverse');
 
-async function getImportsFromFile({ filePath, babelPlugins }) {
+async function getImportsFromFile({
+  filePath, babelPlugins, throwError, log,
+}) {
   const script = await fs.readFile(filePath, 'utf8');
   const imports = [];
+  let parsed;
 
-  const parsed = babelParser.parse(script, {
-    sourceType: 'module',
-    plugins: babelPlugins,
-  });
+  try {
+    parsed = babelParser.parse(script, {
+      sourceType: 'module',
+      plugins: babelPlugins,
+    });
+  } catch (e) {
+    if (log) {
+      console.log(chalk.bgRed(`Unable to parse ${filePath}`)); // eslint-disable-line no-console
+      console.log(chalk.red(e.stack)); // eslint-disable-line no-console
+    }
+    if (throwError) {
+      throw e;
+    }
+  }
+
 
   traverse(parsed, {
     enter({ node }) {

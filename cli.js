@@ -34,6 +34,6 @@ async function run({
 }
 
 run(program.opts()).catch((e) => {
-  console.log(chalk.red(e.message));
+  console.log(chalk.red(e.stack));
   process.exit(1);
 });
