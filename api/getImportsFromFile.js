@@ -41,7 +41,7 @@ async function getImportsFromFile({
         if (node.callee.name === 'require' || node.callee.type === 'Import') {
           const arg = node.arguments[0];
 
-          if (arg) {
+          if (arg && typeof arg.value === 'string') {
             imports.push(arg.value);
           }
         }
