@@ -34,7 +34,7 @@ The tool can be run via `npx check-imports`.
 - `-u`, `--update` - update parent package.json files.
 - `-e`, `--throw-error` - exit process with code 1 in case if there are redundant or missing dependencies (good for CI).
 - `-d`, `--directory-path <value>` - a directory where JavaScript/TypeScript/JSX files are located.
-- `--ignore-path <items>` - a glob pattern (or coma-delimited patterns) to ignore processed files.
+- `--ignore-path <items>` - a glob pattern (or coma-delimited patterns) to ignore processed files (`--ignore-path "**/foo/*.js"`).
 - `-n`, `--ignore-imports <items>` - a comma-delimited list of dependencies that don't need to appear at `"dependencies"`.
 
 

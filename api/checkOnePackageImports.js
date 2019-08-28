@@ -1,5 +1,6 @@
 const { promises: fs } = require('fs');
 const NpmApi = require('npm-api');
+const chalk = require('chalk');
 
 const npm = new NpmApi();
 
@@ -78,9 +79,28 @@ async function checkOnePackageImports({
         pkg[type] = {};
       }
 
-      const v = version || `^${(await npm.repo(dependency).package()).version}`;
+      let v;
 
-      pkg[type][dependency] = v;
+      if (!version) {
+        try {
+          const { version: pkgVersion } = await npm.repo(dependency).package();
+          v = `^${pkgVersion}`;
+          pkg[type][dependency] = v;
+        } catch (e) {
+          if (!('missingPackageDependencies' in pkg)) {
+            pkg.missingPackageDependencies = {};
+          }
+
+          pkg.missingPackageDependencies[dependency] = version || '?.?.?';
+
+          // eslint-disable-next-line no-console
+          console.log(chalk.bgRed(`Package "${dependency}" isn't found at NPM registry. It's going to be automatically added to "missingPackageDependencies" at your package.json`));
+        }
+      } else {
+        v = version;
+        pkg[type][dependency] = v;
+      }
+
 
       result.added.push({
         type,

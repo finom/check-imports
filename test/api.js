@@ -20,6 +20,9 @@ lodash
 
 async function test() {
   const packagePath = path.resolve(__dirname, './package.json');
+  try { await fs.unlink(packagePath); } catch (e) {
+    // noop
+  }
   await fs.copyFile(path.resolve(__dirname, './pkg.json'), packagePath);
   const oldPkg = JSON.parse(await fs.readFile(packagePath));
 
@@ -60,6 +63,7 @@ async function test() {
   expect(Object.keys(result.package.customDependencies).sort()).to.eql(['react-redux'].sort());
   expect(result.package.peerDependencies.react).to.eql('1.1.1');
   expect(result.package.dependencies.moment).to.eql('^999.999.999');
+  expect(Object.keys(result.package.missingPackageDependencies)).to.eql(['azaza-lol-foo-bar-baz']);
 
   expect(result.existing).to.eql([{
     dependency: 'defi', version: '1.0.0', type: 'dependencies', ignore: false,
@@ -77,8 +81,6 @@ async function test() {
     type: 'dependencies',
     ignore: false,
   }]);
-
-  await fs.unlink(packagePath);
 }
 
 // eslint-disable-next-line no-console
