@@ -6,7 +6,8 @@ function logResults(allResults, { update, throwError }) {
     const {
       added, removed, existing, ignored,
     } = result;
-    console.log(chalk.bgGreen(packagePath));
+    const needAChange = added.length || removed.length;
+    console.log(chalk[needAChange ? 'bgYellow' : 'bgGreen'](packagePath));
 
     console.log(`${existing.length} dependencies remain`);
     for (const { version, type, dependency } of existing) {
@@ -28,7 +29,7 @@ function logResults(allResults, { update, throwError }) {
       console.log(chalk.grey(`- ${dependency}${version ? `@${version}` : ''}`));
     }
 
-    if (added.length || removed.length) {
+    if (needAChange) {
       if (!update) {
         console.log('This package.json can be automatically updated with the --update option');
       }
