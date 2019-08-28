@@ -47,7 +47,7 @@ const { checkImports } = require('check-imports');
 The API includes a bit wider set of options. It allows to map dependencies to check if a dependency needs to be ignored or get a wanted version. It also allows to set a list of babel plugin passed to `babelParser` in case if you need to make the tool work with [flow](https://flow.org) syntax for example.
 
 ```js
-await checkImports(options);
+const results = await checkImports(options);
 ```
 
 ### Options
@@ -62,7 +62,7 @@ await checkImports(options);
   - An object with optional keys `version` and `type`. `version` field makes possible to forcibly define a dependency version. `type` field defines a key at package.json where a dependency needs to be stored (`"optionalDependencies"`, `"peerDependencies"` or any custom). By default its value is `"dependencies"`.
 
 ```js
-await checkImports({
+const results = await checkImports({
   directoryPath: path.resolve(__dirname, 'foo'),
   ignorePath: ['**/ignored.*'],
   processManually: (dependency) => {
