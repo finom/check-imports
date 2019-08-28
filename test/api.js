@@ -6,18 +6,6 @@ const chalk = require('chalk');
 
 const { checkImports } = require('../api');
 
-/*
-resulting dep list:
-request
-react
-react-redux
-redux
-moment
-recompose
-lodash
-@babel/parser
-*/
-
 async function test() {
   const packagePath = path.resolve(__dirname, './package.json');
   try { await fs.unlink(packagePath); } catch (e) {

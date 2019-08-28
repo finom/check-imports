@@ -6,18 +6,6 @@ const chalk = require('chalk');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
-/*
-resulting dep list:
-request
-react
-react-redux
-redux
-moment
-recompose
-lodash
-@babel/parser
-*/
-
 async function test() {
   const packagePath = path.resolve(__dirname, './package.json');
   try { await fs.unlink(packagePath); } catch (e) {
