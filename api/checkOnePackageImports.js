@@ -27,7 +27,7 @@ async function checkOnePackageImports({
   let pkg = JSON.parse(await fs.readFile(packagePath, 'utf8'));
 
   const newDependencies = {};
-  const oldDependencies = pkg.dependencies;
+  const oldDependencies = pkg.dependencies || {};
 
   for (const dependency of dependencies) {
     if (dependency in (pkg.dependencies || {})) {
