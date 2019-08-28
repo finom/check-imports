@@ -4,7 +4,6 @@ const commander = require('commander');
 const chalk = require('chalk');
 const pkg = require('./package');
 const { checkImports } = require('./api');
-const logResults = require('./api/logResults');
 
 const program = new commander.Command();
 program.version(pkg.version)
@@ -21,16 +20,16 @@ program.parse(process.argv);
 async function run({
   ignoreImports = [], ignorePath = [], directoryPath = '.', update = false, throwError = false,
 }) {
-  const allResults = await checkImports({
+  return checkImports({
+    log: true,
     directoryPath,
     ignorePath,
     update,
+    throwError,
     processManually(dependency) {
       return !ignoreImports.includes(dependency);
     },
   });
-
-  logResults(allResults, { throwError, update });
 }
 
 run(program.opts()).catch((e) => {
