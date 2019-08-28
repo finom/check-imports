@@ -11,6 +11,7 @@ async function checkOnePackageImports({
   processManually,
   update,
   throwError,
+  log,
 }) {
   const result = {
     existing: [],
@@ -93,8 +94,11 @@ async function checkOnePackageImports({
 
           pkg.missingPackageDependencies[dependency] = version || '?.?.?';
 
-          // eslint-disable-next-line no-console
-          console.log(chalk.bgRed(`Package "${dependency}" isn't found at NPM registry. It's going to be automatically added to "missingPackageDependencies" at your package.json if "update" option is set to true`));
+          if(log) {
+            // eslint-disable-next-line no-console
+            console.log(chalk.bgRed(`Package "${dependency}" isn't found at NPM registry. It's going to be automatically added to "missingPackageDependencies" at your package.json if "update" option is set to true`));
+
+          }
         }
       } else {
         v = version;

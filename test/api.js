@@ -41,6 +41,7 @@ async function test() {
       return true;
     },
     update: true,
+    log: true,
   });
 
   const pkg = JSON.parse(await fs.readFile(path.resolve(__dirname, './package.json'), 'utf8'));

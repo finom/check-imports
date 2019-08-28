@@ -53,6 +53,7 @@ const results = await checkImports(options);
 ### Options
 - `update = false` - either update package.json files or not.
 - `throwError = false` - throw an error in case if there are redundant or missing dependencies
+- `log = false` - print CLI output
 - `directoryPath = process.cwd()` - a directory where JavaScript/TypeScript/JSX files are located.
 - `ignorePath = []` - a glob pattern or an array of patterns to ignore processed files.
 - `babelPlugins = require('./defaultBabelPlugins')` - a list of parser plugins described [there](https://babeljs.io/docs/en/babel-parser).
