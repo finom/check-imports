@@ -1,6 +1,6 @@
 {
   "name": "check-imports",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Checks imports and updates package.json dependencies",
   "main": "./api/index.js",
   "bin": {
