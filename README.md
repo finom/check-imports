@@ -14,16 +14,16 @@ Install: `npm i -D check-imports` and use: `npx check-imports`.
 2. Builds their AST trees via [@babel/parser](https://babeljs.io/docs/en/babel-parser);
 3. Retrieves import paths from `import from`, `require()`, `import()`;
 4. Runs some filters and mappings:
-  a. Ignore relative paths;
-  b. Ignore built-in NodeJS modules such as `path`, `fs`, `child_process` etc;
-  c. Retrieve module names (`lodash/pick` becomes `lodash`);
-  d. Retrieve module names from scoped packages (`@scope/module/foo/bar` becomes `@scope/module`);
-  e. Get rid of Webpack syntax (`foo!bar!baz?quux=bat&xyzzy=plugh` becomes `baz`);
+  1. Ignore relative paths;
+  2. Ignore built-in NodeJS modules such as `path`, `fs`, `child_process` etc;
+  3. Retrieve module names (`lodash/pick` becomes `lodash`);
+  4. Retrieve module names from scoped packages (`@scope/module/foo/bar` becomes `@scope/module`);
+  5. Get rid of Webpack syntax (`foo!bar!baz?quux=bat&xyzzy=plugh` becomes `baz`);
 5. Finds a "parent" (a closest) package.json file;
 6. Compares its contents with the retrieved list of imports and if `update` option is set to `true` the script updates it.
-  a. If `ignore` option is provided then `"dependencies"` aren't going to be updated with a given dependency or multiple dependencies;
-  b. If a dependency already exists either at `"dependencies"`, `"optionalDependencies"` or `"peerDependencies"` then `"dependencies"` aren't going to be updated and a dependency version remains the same;
-  c. If neither of things above is happened then a dependency of a latest version retrieved from NPM registry is going to be added to `"dependencies"`.
+  1. If `ignore` option is provided then `"dependencies"` aren't going to be updated with a given dependency or multiple dependencies;
+  2. If a dependency already exists either at `"dependencies"`, `"optionalDependencies"` or `"peerDependencies"` then `"dependencies"` aren't going to be updated and a dependency version remains the same;
+  3. If neither of things above is happened then a dependency of a latest version retrieved from NPM registry is going to be added to `"dependencies"`.
 
 Note that after an update you still need to run `npm install` manually.
 
