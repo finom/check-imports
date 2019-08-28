@@ -1,6 +1,5 @@
-module.exports = [
+const common = [
   'jsx',
-  'typescript',
   'asyncGenerators',
   'bigInt',
   'classProperties',
@@ -24,3 +23,15 @@ module.exports = [
   ['pipelineOperator', { proposal: 'minimal' }],
   'throwExpressions',
 ];
+
+const defaultBabelPlugins = [
+  ...common,
+  'typescript',
+];
+
+const flowBabelPlugins = [
+  ...common,
+  'flow',
+];
+
+module.exports = { defaultBabelPlugins, flowBabelPlugins };

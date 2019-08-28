@@ -1,6 +1,5 @@
 const getGroupedDependencies = require('./getGroupedDependencies');
 const checkOnePackageImports = require('./checkOnePackageImports');
-const defaultBabelPlugins = require('./defaultBabelPlugins');
 const logResults = require('./logResults');
 
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
@@ -11,7 +10,7 @@ async function checkImports({
   update = false,
   throwError = false,
   log = false,
-  babelPlugins = defaultBabelPlugins,
+  babelPlugins = null,
 } = {}) {
   const groupedDependencies = await getGroupedDependencies({
     directoryPath, ignorePath, babelPlugins, throwError, log,

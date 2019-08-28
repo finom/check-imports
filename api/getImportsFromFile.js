@@ -3,6 +3,22 @@ const fs = require('fs').promises;
 const chalk = require('chalk');
 const babelParser = require('@babel/parser');
 const { default: traverse } = require('@babel/traverse');
+const { defaultBabelPlugins, flowBabelPlugins } = require('./babelPlugins');
+
+const parse = (script) => {
+  try {
+    return babelParser.parse(script, {
+      sourceType: 'module',
+      plugins: defaultBabelPlugins,
+    });
+  } catch (e) {
+    // try to parse with flow syntax
+    return babelParser.parse(script, {
+      sourceType: 'module',
+      plugins: flowBabelPlugins,
+    });
+  }
+};
 
 async function getImportsFromFile({
   filePath, babelPlugins, throwError, log,
@@ -12,10 +28,14 @@ async function getImportsFromFile({
   let parsed;
 
   try {
-    parsed = babelParser.parse(script, {
-      sourceType: 'module',
-      plugins: babelPlugins,
-    });
+    if (babelPlugins) {
+      parsed = babelParser.parse(script, {
+        sourceType: 'module',
+        plugins: babelPlugins,
+      });
+    } else {
+      parsed = parse(script);
+    }
   } catch (e) {
     if (log) {
       console.log(chalk.bgRed(`Unable to parse ${filePath}`)); // eslint-disable-line no-console

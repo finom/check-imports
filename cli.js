@@ -13,7 +13,8 @@ program.version(pkg.version)
   .option('-d, --directory-path <value>', 'working directory path')
   .option('--ignore-path <items>', 'a glob pattern to ignore processed files')
   .option('-u, --update', 'update package.json files')
-  .option('-e, --throw-error', 'exit process with code 1 in case if there are redundant or missing dependencies');
+  .option('-e, --throw-error', 'exit process with code 1 in case if there are redundant or missing dependencies')
+  .option('--flow', 'use flow syntax parser');
 
 program.parse(process.argv);
 
