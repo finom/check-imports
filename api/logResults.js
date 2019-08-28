@@ -10,7 +10,7 @@ function logResults(allResults, { update, throwError }) {
 
     console.log(`${existing.length} dependencies remain`);
     for (const { version, type, dependency } of existing) {
-      console.log(chalk.blue(`- ${dependency}${version ? `@${version}` : ''} (${type})`));
+      console.log(chalk.cyan(`- ${dependency}${version ? `@${version}` : ''} (${type})`));
     }
 
     console.log(`${added.length} dependencies to add`);
