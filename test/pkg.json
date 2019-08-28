@@ -1,0 +1,12 @@
+{
+  "name": "foo-bar",
+  "version": "1.2.3",
+  "dependencies": {
+    "express": "^4.17.1",
+    "defi": "1.0.0"
+  },
+  "peerDependencies": {
+    "body-parser": "0.0.0",
+    "jquery": "100.100.100"
+  }
+}
