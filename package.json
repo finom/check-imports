@@ -1,6 +1,6 @@
 {
   "name": "check-imports",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Checks imports and updates package.json dependencies",
   "main": "./dist/api/index.mjs",
   "type": "module",
