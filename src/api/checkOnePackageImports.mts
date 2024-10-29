@@ -2,23 +2,16 @@ import { promises as fs } from 'fs';
 import chalk from 'chalk';
 import type { PackageJson } from "type-fest";
 import { DependenciesKey } from '../types/index.mjs';
+import fetch from 'npm-registry-fetch';
 
-import { exec } from 'child_process';
-
-function getPackageInfo(dependency: string): Promise<PackageJson> {
-  return new Promise((resolve, reject) => {
-    exec(`npm view ${dependency} --json`, (error, stdout, stderr) => {
-      if (error) {
-        reject(`error: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        reject(`stderr: ${stderr}`);
-        return;
-      }
-      resolve(JSON.parse(stdout));
-    });
+async function getPackageInfo(dependency: string) {
+  const authToken = process.env.NPM_TOKEN; // Ensure your token is secure
+  const response = await fetch.json(`/${dependency}`, {
+    auth: {
+      token: authToken,
+    },
   });
+  return response;
 }
 
 export type ProcessManuallyResult = boolean | {

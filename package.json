@@ -8,10 +8,11 @@
     "check-imports": "./dist/cli.mjs"
   },
   "scripts": {
-    "ncu": "ncu -u -x **eslint** && npm i",
+    "ncu": "npx npm-check-updates -u -x **eslint** && npm i",
     "test": "npm run build && node test/index.mjs",
     "build": "tsc && chmod +x ./dist/cli.mjs",
     "lint": "eslint 'api/**/*.js' 'test/**/*.js' '*.js' --ignore-pattern '**/node_modules/**/*'",
+    "check-imports": "node dist/cli.mjs -d src",
     "patch": "npm version patch && npm run build && npm publish && git push && git push --tags",
     "minor": "npm version minor && npm run build && npm publish && git push && git push --tags",
     "BREAKING-major": "npm version major && npm run build && npm publish && git push && git push --tags"
@@ -30,16 +31,16 @@
     "find-up": "^4.1.0",
     "glob": "^7.1.4",
     "glob-promise": "^3.4.0",
-    "npm-api": "^1.0.0",
+    "npm-registry-fetch": "^18.0.2",
     "ts-morph": "^24.0.0"
   },
   "devDependencies": {
+    "@types/npm-registry-fetch": "^8.0.7",
     "babel-eslint": "^10.0.3",
     "eslint": "6.1.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-babel": "^5.3.0",
     "eslint-plugin-import": "^2.18.2",
-    "expect.js": "^0.3.1",
     "type-fest": "^4.26.1",
     "typescript": "^5.6.3"
   }
