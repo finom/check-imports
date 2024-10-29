@@ -68,7 +68,7 @@ const checkOnePackageImports = async ({
 
   const isExisting = (dep: string) => result.existing.some(({ dependency }) => dependency === dep);
 
-  let pkg = JSON.parse(await fs.readFile(packagePath, 'utf8')) as PackageJson & { missingPackageDependencies: PackageJson['dependencies'] };;
+  let pkg = JSON.parse(await fs.readFile(packagePath, 'utf8')) as PackageJson & { checkImportsMissingDependencies: PackageJson['dependencies'] };;
   const newDependencies = {} as Record<string, string>;
   const oldDependencies = pkg.dependencies as Record<string, string> || {};
 
@@ -95,7 +95,7 @@ const checkOnePackageImports = async ({
     }
   }
 
-  pkg = { ...pkg, dependencies: newDependencies } as PackageJson & { missingPackageDependencies: PackageJson['dependencies'] };
+  pkg = { ...pkg, dependencies: newDependencies } as PackageJson & { checkImportsMissingDependencies: PackageJson['dependencies'] };
 
   for (const dependency of dependencies) {
     const defaultInfo = { type: 'dependencies', ignore: false, version: null } as const;
@@ -124,15 +124,15 @@ const checkOnePackageImports = async ({
           if (!pkg[type]) pkg[type] = {};
           pkg[type][dependency] = resolvedVersion;
         } catch (e) {
-          if (!pkg.missingPackageDependencies) {
-            pkg.missingPackageDependencies = {};
+          if (!pkg.checkImportsMissingDependencies) {
+            pkg.checkImportsMissingDependencies = {};
           }
-          pkg.missingPackageDependencies[dependency] = '?.?.?';
+          pkg.checkImportsMissingDependencies[dependency] = '?.?.?';
 
           if (log) {
             console.log(
               chalk.bgRed(
-                `Package "${dependency}" isn't found at NPM registry. It will be added to "missingPackageDependencies" in package.json if "update" is true.`,
+                `Package "${dependency}" isn't found at NPM registry. It will be added to "checkImportsMissingDependencies" in package.json if "update" is true.`,
               ),
             );
           }

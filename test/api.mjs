@@ -68,7 +68,7 @@ await test('Package Import Check Test', async (t) => {
     assert.strictEqual(result.package.peerDependencies.react, '1.1.1');
     assert.strictEqual(result.package.dependencies.moment, '^999.999.999');
     assert.deepStrictEqual(
-      Object.keys(result.package.missingPackageDependencies),
+      Object.keys(result.package.checkImportsMissingDependencies),
       ['azaza-lol-bar']
     );
   });

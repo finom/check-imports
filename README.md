@@ -1,7 +1,14 @@
 # check-imports [![npm version](https://badge.fury.io/js/check-imports.svg)](https://badge.fury.io/js/check-imports) [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](https://www.typescriptlang.org)
 
 
-Checks `import from` declarations, `import` and `require` calls then updates or removes package.json dependencies (if `update` option described below is set to `true`, otherwise you only get informed) from package.json files. Works great with single-package modules as well as with big projects with multiple package.json files (if you have a monorepo, for example).
+Checks `import from` declarations, `import` and `require` calls in your code and reports if:
+
+- Dependency is listed at package.json but never used at the folder relative to the package.json file.
+- A module is imported but dependency isn't listed at the closest package.json.
+
+With `--update` option updates dependencies automatically (adds missing, removes unused).
+
+Originally created for monorepos but can be used with any nested project structure with one or multiple package.json files.
 
 ## TL;DR
 
@@ -12,17 +19,16 @@ Checks `import from` declarations, `import` and `require` calls then updates or 
 
 ## How it works
 
-1. The library gets all .js, .jsx, .ts files by a given path;
-2. Builds AST tree via [ts-morph](https://www.npmjs.com/package/ts-morph);
-3. Retrieves import paths from `import from`, `require()`, `import()`;
-4. Runs the following filtering and mapping:
+1. The library gets all .js, .jsx, .ts, .mjs, .mts, .cjs files from CWD or directory relative to CWD that's defined with `-d` flag;
+2. Builds AST via [ts-morph](https://www.npmjs.com/package/ts-morph) and retrieves import paths from `import from`, `require()`, `import()`;
+3. Runs the following filtering and mapping:
     1. Ignore relative paths;
     2. Ignore built-in NodeJS modules such as `node:path`, `path`, `node:fs`, `fs`, etc;
     3. Retrieve module names (`lodash/pick` becomes `lodash`);
     4. Retrieve module names from scoped packages (`@scope/module/foo/bar` becomes `@scope/module`);
     5. Get rid of Webpack syntax (`foo!bar!baz?quux=bat&xyzzy=plugh` becomes `baz`);
-5. Finds a closest package.json file relative to the file with import;
-6. Compares its contents with the retrieved list of imports and if `update` option is set to `true` the script updates it.
+4. Finds a closest package.json file relative to the file with import;
+5. Compares its contents with the retrieved list of imports and if `update` option is set to `true` the script updates it.
     1. If `ignore` option is provided then `"dependencies"` aren't going to be updated with a given dependency or multiple dependencies;
     2. If a dependency already exists either at `"dependencies"`, `"optionalDependencies"`, `"devDependencies"` or `"peerDependencies"` then `"dependencies"` aren't going to be updated and a dependency version remains the same;
     3. If none of these two, a dependency of a latest version is retrieved from NPM registry and going to be added to `"dependencies"`.
