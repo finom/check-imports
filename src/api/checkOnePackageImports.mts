@@ -4,14 +4,17 @@ import type { PackageJson } from "type-fest";
 import { DependenciesKey } from '../types/index.mjs';
 import fetch from 'npm-registry-fetch';
 
-async function getPackageInfo(dependency: string) {
+async function getPackageVersion(dependency: string) {
   const authToken = process.env.NPM_TOKEN;
   const response = await fetch.json(`/${dependency}`, {
     auth: {
       token: authToken,
     },
-  });
-  return response;
+  }) as {
+    'dist-tags': Record<string, string>;
+  };
+
+  return response['dist-tags'].latest ?? response['dist-tags'][Object.keys(response['dist-tags'])[0]];
 }
 
 export type ProcessManuallyResult = boolean | {
@@ -116,7 +119,7 @@ const checkOnePackageImports = async ({
 
       if (!version) {
         try {
-          const { version: pkgVersion } = await getPackageInfo(dependency);
+          const pkgVersion = await getPackageVersion(dependency);
           resolvedVersion = `^${pkgVersion}`;
           if (!pkg[type]) pkg[type] = {};
           pkg[type][dependency] = resolvedVersion;
