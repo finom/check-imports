@@ -1,6 +1,6 @@
 {
   "name": "check-imports",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Node.js tool that helps to control validity of imports and dependencies in a project",
   "main": "./dist/api/index.mjs",
   "type": "module",
