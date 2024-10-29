@@ -16,7 +16,7 @@ export default async function getGroupedDependencies({
   throwError = false,
   log = false,
 }: GetGroupedDependenciesOptions): Promise<Record<string, Record<string, boolean>>> {
-  const filePaths = await glob(path.resolve(directoryPath, "**/*.{ts,js,jsx}"), {
+  const filePaths = await glob(path.resolve(directoryPath, "**/*.{ts,js,jsx,mts,mjs,cjs}"), {
     ignore: [
       "**/node_modules/**",
       ...(typeof ignorePath === "string" ? [ignorePath] : ignorePath || []),
