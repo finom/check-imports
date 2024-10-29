@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import chalk from 'chalk';
-import pkg from '../package.json';
+import pkg from '../package.json' with { type: "json" };
 import checkImports from './api/index.mjs';
 
 const program = new Command();

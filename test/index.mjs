@@ -1,2 +1,2 @@
 await import('./api.mjs');
-// await import('./cli.mjs');
+await import('./cli.mjs');

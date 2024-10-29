@@ -9,13 +9,14 @@
   },
   "scripts": {
     "ncu": "npx npm-check-updates -u -x **eslint** && npm i",
-    "test": "npm run build && node test/index.mjs",
+    "test": "npm run build && npm run unit",
+    "unit": "node test/index.mjs",
     "build": "tsc && chmod +x ./dist/cli.mjs",
     "lint": "eslint 'api/**/*.js' 'test/**/*.js' '*.js' --ignore-pattern '**/node_modules/**/*'",
     "check-imports": "node dist/cli.mjs -d src",
-    "patch": "npm version patch && npm run build && npm publish && git push && git push --tags",
-    "minor": "npm version minor && npm run build && npm publish && git push && git push --tags",
-    "BREAKING-major": "npm version major && npm run build && npm publish && git push && git push --tags"
+    "patch": "npm version patch && npm run test && npm publish && git push && git push --tags",
+    "minor": "npm version minor && npm run test && npm publish && git push && git push --tags",
+    "BREAKING-major": "npm version major && npm run test && npm publish && git push && git push --tags"
   },
   "author": "Andrey Gubanov",
   "license": "MIT",
