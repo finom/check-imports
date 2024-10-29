@@ -5,7 +5,7 @@ import { DependenciesKey } from '../types/index.mjs';
 import fetch from 'npm-registry-fetch';
 
 async function getPackageInfo(dependency: string) {
-  const authToken = process.env.NPM_TOKEN; // Ensure your token is secure
+  const authToken = process.env.NPM_TOKEN;
   const response = await fetch.json(`/${dependency}`, {
     auth: {
       token: authToken,
