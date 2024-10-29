@@ -1,6 +1,6 @@
 {
   "name": "check-imports",
-  "version": "0.1.12",
+  "version": "1.0.0",
   "description": "Checks imports and updates package.json dependencies",
   "main": "./dist/api/index.mjs",
   "type": "module",
@@ -37,7 +37,7 @@
     "babel-eslint": "^10.0.3",
     "eslint": "6.1.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-babel": "^5.3.0", 
+    "eslint-plugin-babel": "^5.3.0",
     "eslint-plugin-import": "^2.18.2",
     "expect.js": "^0.3.1",
     "type-fest": "^4.26.1",
