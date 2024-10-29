@@ -1,6 +1,6 @@
 {
   "name": "check-imports",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Node.js Monorepo tool that helps to control validity of imports and dependencies in your project",
   "main": "./dist/api/index.mjs",
   "type": "module",
