@@ -1,10 +1,25 @@
 import { promises as fs } from 'fs';
-import NpmApi from 'npm-api';
 import chalk from 'chalk';
 import type { PackageJson } from "type-fest";
 import { DependenciesKey } from '../types/index.mjs';
 
-const npm = new NpmApi();
+import { exec } from 'child_process';
+
+function getPackageInfo(dependency: string): Promise<PackageJson> {
+  return new Promise((resolve, reject) => {
+    exec(`npm view ${dependency} --json`, (error, stdout, stderr) => {
+      if (error) {
+        reject(`error: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        reject(`stderr: ${stderr}`);
+        return;
+      }
+      resolve(JSON.parse(stdout));
+    });
+  });
+}
 
 export type ProcessManuallyResult = boolean | {
   type?: DependenciesKey;
@@ -108,7 +123,7 @@ const checkOnePackageImports = async ({
 
       if (!version) {
         try {
-          const { version: pkgVersion } = await npm.repo(dependency).package();
+          const { version: pkgVersion } = await getPackageInfo(dependency);
           resolvedVersion = `^${pkgVersion}`;
           if (!pkg[type]) pkg[type] = {};
           pkg[type][dependency] = resolvedVersion;
