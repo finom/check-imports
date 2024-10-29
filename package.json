@@ -13,7 +13,8 @@
     "build": "tsc && chmod +x ./dist/cli.mjs",
     "lint": "eslint 'api/**/*.js' 'test/**/*.js' '*.js' --ignore-pattern '**/node_modules/**/*'",
     "patch": "npm version patch && npm publish && git push && git push --tags",
-    "minor": "npm version minor && npm publish && git push && git push --tags"
+    "minor": "npm version minor && npm publish && git push && git push --tags",
+    "BREAKING-major": "npm version major && npm publish && git push && git push --tags"
   },
   "author": "Andrey Gubanov",
   "license": "MIT",
@@ -36,7 +37,7 @@
     "babel-eslint": "^10.0.3",
     "eslint": "6.1.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-babel": "^5.3.0", 
     "eslint-plugin-import": "^2.18.2",
     "expect.js": "^0.3.1",
     "type-fest": "^4.26.1",
