@@ -26,9 +26,9 @@ Install: `npm i -D check-imports` and use: `npx check-imports`.
     2. If a dependency already exists either at `"dependencies"`, `"optionalDependencies"`, `"devDependencies"` or `"peerDependencies"` then `"dependencies"` aren't going to be updated and a dependency version remains the same;
     3. If none of these two, a dependency of a latest version is retrieved from NPM registry and going to be added to `"dependencies"`.
 
-Note that after an update you still need to run `npm install` manually.
+After an update you still need to run `npm install` manually.
 
-A bonus: imports can be ignored directly in code via `check-imports-ignore-line` comment
+Bonus: imports can be ignored directly in code via `check-imports-ignore-line` comment.
 
 ```js
 require('lodash'); // check-imports-ignore-line
