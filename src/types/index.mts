@@ -1,0 +1,1 @@
+export type DependenciesKey = 'dependencies' | 'devDependencies' | 'peerDependencies' | 'optionalDependencies';

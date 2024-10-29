@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "module": "nodenext",                                /* Specify what module code is generated. */
+    "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+    "strict": true,                                      /* Enable all strict type-checking options. */
+    "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
+    "allowSyntheticDefaultImports": true,                /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */
+    "rootDir": "./src",                                  /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+    "outDir": "./dist",                                  /* Specify an output folder for all emitted files. */
+    "resolveJsonModule": true,                           /* Include modules imported with .json extension. */
+    "declaration": true,                                 /* Generate corresponding .d.ts file. */
+    "types": ["node"],                                   /* Type declaration files to be included in compilation. */
+    "typeRoots": ["./src/types", "./node_modules/@types"]
+  },
+  "include": ["src/**/*.mts", "src/types/**/*.d.ts"],                            /* Specify an array of glob patterns that match the files to include in the program. */
+  
+}

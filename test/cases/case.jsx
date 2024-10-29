@@ -8,6 +8,7 @@ import 'azaza-lol-bar'; // unexisting package
 
 import foo from 'azaza-lol-baz'; // check-imports-ignore-line
 
+const x = await import('tailwind-to-object');
 
 window.jQuery = require('jquery');
 

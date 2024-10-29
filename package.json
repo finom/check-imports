@@ -2,12 +2,15 @@
   "name": "check-imports",
   "version": "0.1.12",
   "description": "Checks imports and updates package.json dependencies",
-  "main": "./api/index.js",
+  "main": "./dist/api/index.mjs",
+  "type": "module",
   "bin": {
-    "check-imports": "./cli.js"
+    "check-imports": "./dist/cli.mjs"
   },
   "scripts": {
-    "test": "node test",
+    "ncu": "ncu -u -x **eslint** && npm i",
+    "test": "node test/index.mjs",
+    "build": "tsc && chmod +x ./dist/cli.mjs",
     "lint": "eslint 'api/**/*.js' 'test/**/*.js' '*.js' --ignore-pattern '**/node_modules/**/*'",
     "patch": "npm version patch && npm publish && git push && git push --tags",
     "minor": "npm version minor && npm publish && git push && git push --tags"
@@ -21,12 +24,13 @@
   "dependencies": {
     "@babel/parser": "^7.5.5",
     "@babel/traverse": "^7.5.5",
-    "chalk": "^2.4.2",
+    "chalk": "^5.3.0",
     "commander": "^3.0.0",
     "find-up": "^4.1.0",
     "glob": "^7.1.4",
     "glob-promise": "^3.4.0",
-    "npm-api": "^1.0.0"
+    "npm-api": "^1.0.0",
+    "ts-morph": "^24.0.0"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
@@ -34,6 +38,8 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-babel": "^5.3.0",
     "eslint-plugin-import": "^2.18.2",
-    "expect.js": "^0.3.1"
+    "expect.js": "^0.3.1",
+    "type-fest": "^4.26.1",
+    "typescript": "^5.6.3"
   }
 }

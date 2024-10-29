@@ -1,6 +1,6 @@
 # check-imports [![npm version](https://badge.fury.io/js/check-imports.svg)](https://badge.fury.io/js/check-imports)
 
-Checks `import from` declarations, `import` and `require` calls then updates or removes package.json dependencies (if `update` option described below is set to `true`, otherwise you only get informed) from package.json files. Works great with single-package modules as well as with big projects with multiple package.json files (for example if you have a monorepo powered by [lerna](https://github.com/lerna/lerna)).
+Checks `import from` declarations, `import` and `require` calls then updates or removes package.json dependencies (if `update` option described below is set to `true`, otherwise you only get informed) from package.json files. Works great with single-package modules as well as with big projects with multiple package.json files (if you have a monorepo, for example).
 
 ## TL;DR
 Install: `npm i -D check-imports` and use: `npx check-imports`.
@@ -11,19 +11,19 @@ Install: `npm i -D check-imports` and use: `npx check-imports`.
 ## How it works
 
 1. The library gets all .js, .jsx, .ts files by a given path;
-2. Builds their AST trees via [@babel/parser](https://babeljs.io/docs/en/babel-parser);
+2. Builds AST tree via [ts-morph](https://www.npmjs.com/package/ts-morph);
 3. Retrieves import paths from `import from`, `require()`, `import()`;
-4. Runs some filters and mappings:
+4. Runs the following filtering and mapping:
     1. Ignore relative paths;
-    2. Ignore built-in NodeJS modules such as `path`, `fs`, `child_process` etc;
+    2. Ignore built-in NodeJS modules such as `node:path`, `path`, `node:fs`, `fs`, etc;
     3. Retrieve module names (`lodash/pick` becomes `lodash`);
     4. Retrieve module names from scoped packages (`@scope/module/foo/bar` becomes `@scope/module`);
     5. Get rid of Webpack syntax (`foo!bar!baz?quux=bat&xyzzy=plugh` becomes `baz`);
-5. Finds a "parent" (a closest) package.json file;
+5. Finds a closest package.json file relative to the file with import;
 6. Compares its contents with the retrieved list of imports and if `update` option is set to `true` the script updates it.
     1. If `ignore` option is provided then `"dependencies"` aren't going to be updated with a given dependency or multiple dependencies;
-    2. If a dependency already exists either at `"dependencies"`, `"optionalDependencies"` or `"peerDependencies"` then `"dependencies"` aren't going to be updated and a dependency version remains the same;
-    3. If neither of things above is happened then a dependency of a latest version retrieved from NPM registry is going to be added to `"dependencies"`.
+    2. If a dependency already exists either at `"dependencies"`, `"optionalDependencies"`, `"devDependencies"` or `"peerDependencies"` then `"dependencies"` aren't going to be updated and a dependency version remains the same;
+    3. If none of these two, a dependency of a latest version is retrieved from NPM registry and going to be added to `"dependencies"`.
 
 Note that after an update you still need to run `npm install` manually.
 
@@ -47,10 +47,10 @@ The tool can be run via `npx check-imports`.
 
 ## API
 ```js
-const { checkImports } = require('check-imports');
+import checkImports from 'check-imports';
 ```
 
-The API includes a bit wider set of options. It allows to map dependencies to check if a dependency needs to be ignored or get a wanted version. It also allows to set a list of babel plugin passed to `babelParser` in case if you need to make the tool work with [flow](https://flow.org) syntax for example.
+The API includes a bit wider set of options. It allows to map dependencies to check if a dependency needs to be ignored or get a wanted version.
 
 ```js
 const results = await checkImports(options);
@@ -62,7 +62,6 @@ const results = await checkImports(options);
 - `log = false` - print CLI output
 - `directoryPath = process.cwd()` - a directory where JavaScript/TypeScript/JSX files are located.
 - `ignorePath = []` - a glob pattern or an array of patterns to ignore processed files.
-- `babelPlugins = require('./defaultBabelPlugins')` - a list of parser plugins described [there](https://babeljs.io/docs/en/babel-parser).
 - `processManually = null` - a function which is run agains every found import. You may want to define it in case if you want to ignore some dependencies or set a wanted version. It should return either of the following values:
     - `true` - process a dependency a regular way.
     - `false` - ignore a dependency.

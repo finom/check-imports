@@ -8,5 +8,8 @@
   "peerDependencies": {
     "body-parser": "0.0.0",
     "jquery": "100.100.100"
+  },
+  "devDependencies": {
+    "tailwind-to-object": "^8.3.2"
   }
 }
