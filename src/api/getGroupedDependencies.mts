@@ -1,6 +1,6 @@
-import findUp from "find-up";
+import { findUp } from "find-up";
 import path from "path";
-import glob from "glob-promise";
+import { glob } from "glob";
 import getImportsFromFile from "./getImportsFromFile.mjs";
 
 type GetGroupedDependenciesOptions = {

@@ -4,7 +4,8 @@
 Checks `import from` declarations, `import` and `require` calls then updates or removes package.json dependencies (if `update` option described below is set to `true`, otherwise you only get informed) from package.json files. Works great with single-package modules as well as with big projects with multiple package.json files (if you have a monorepo, for example).
 
 ## TL;DR
-Install: `npm i -D check-imports` and use: `npx check-imports`.
+
+`npx check-imports`
 
 <img src="https://i.imgur.com/NNKg1de.png" alt="Screenshot" width="500"/>
 
