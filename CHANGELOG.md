@@ -32,6 +32,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `-n` and `--ignore-path` split their value at commas. Before, `-n` matched substrings (`-n react-redux` also ignored `react` and `redux`), and `--ignore-path` took the whole value as one glob.
 - The `processManually` type accepts the object form.
+- A package named like an `Object.prototype` key (`constructor`, `toString`) no longer counts as listed in every `package.json`.
+- A registry answer without `dist-tags` marks the package as not on npm instead of crashing.
 
 ### Removed
 

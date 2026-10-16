@@ -4,7 +4,7 @@ import type { DependenciesKey, PackageJson } from '../types/index.mjs';
 
 const DEFAULT_REGISTRY = 'https://registry.npmjs.org/';
 
-// The latest version on the registry npm uses (`npm_config_registry`), or null when the package isn't there.
+// The latest version on the registry npm uses (`npm_config_registry`), or null when the package has none there.
 async function getLatestVersion(dependency: string): Promise<string | null> {
   const registry = process.env.npm_config_registry || DEFAULT_REGISTRY;
   const url = new URL(dependency.replace('/', '%2f'), registry.endsWith('/') ? registry : `${registry}/`);
@@ -24,8 +24,8 @@ async function getLatestVersion(dependency: string): Promise<string | null> {
     throw new Error(`Unable to get the latest version of "${dependency}" from ${registry}: ${response.status}`);
   }
 
-  const distTags = ((await response.json()) as { 'dist-tags': Record<string, string> })['dist-tags'];
-  return distTags.latest ?? Object.values(distTags)[0];
+  const distTags = ((await response.json()) as { 'dist-tags'?: Record<string, string> })['dist-tags'] ?? {};
+  return distTags.latest ?? Object.values(distTags)[0] ?? null;
 }
 
 export type ProcessManuallyResult =
@@ -93,10 +93,10 @@ export default async function checkOnePackageImports({
 
   for (const dependency of imported) {
     for (const type of LISTS) {
-      const version = original[type]?.[dependency];
-      if (version !== undefined) {
+      const list = original[type];
+      if (list && Object.hasOwn(list, dependency)) {
         listed.add(dependency);
-        result.existing.push({ dependency, version, type, ignore: false });
+        result.existing.push({ dependency, version: list[dependency], type, ignore: false });
       }
     }
   }

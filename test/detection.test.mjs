@@ -203,3 +203,13 @@ test('files with no package.json above them are skipped', async () => {
   const dir = await fixture({ 'a.js': "require('orphan');" });
   assert.deepEqual(await checkImports({ directoryPath: dir }), []);
 });
+
+test('a package named like an Object.prototype key is not taken as listed', async () => {
+  const dir = await fixture({
+    'package.json': { name: 'p', dependencies: {}, devDependencies: {} },
+    'a.js': "require('constructor'); require('toString');",
+  });
+  const [{ result }] = await checkImports({ directoryPath: dir });
+  assert.deepEqual(result.existing, []);
+  assert.deepEqual(names(result.added), ['constructor', 'toString']);
+});

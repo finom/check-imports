@@ -7,20 +7,21 @@ import { fileURLToPath } from 'node:url';
 
 export const cliPath = fileURLToPath(new URL('../dist/cli.mjs', import.meta.url));
 
-// A fake npm registry. `versions` maps a name to its latest version, to its dist-tags, or to an HTTP status;
+// A fake npm registry. `versions` maps a name to its latest version, to its dist-tags (null: none), or to an HTTP status;
 // any other name is a 404.
 export async function startRegistry(versions = {}) {
   const requests = [];
   const server = http.createServer((req, res) => {
     const name = decodeURIComponent(req.url.slice(1));
     requests.push({ name, authorization: req.headers.authorization });
-    const entry = versions[name];
+    const entry = Object.hasOwn(versions, name) ? versions[name] : undefined;
     if (typeof entry === 'number') {
       res.writeHead(entry);
       res.end();
     } else if (entry !== undefined) {
       res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ name, 'dist-tags': typeof entry === 'string' ? { latest: entry } : entry }));
+      const distTags = typeof entry === 'string' ? { latest: entry } : entry;
+      res.end(JSON.stringify(distTags === null ? { name } : { name, 'dist-tags': distTags }));
     } else {
       res.writeHead(404, { 'content-type': 'application/json' });
       res.end('{"error":"Not found"}');

@@ -13,6 +13,7 @@ before(async () => {
     existing: '9.9.9',
     'beta-only': { beta: '3.0.0-beta.1' },
     'server-error': 500,
+    'no-versions': null,
   });
 });
 after(() => registry.close());
@@ -202,4 +203,12 @@ test('a registry URL without a trailing slash works', async () => {
   } finally {
     process.env.npm_config_registry = registry.url;
   }
+});
+
+test('a package with no versions on the registry counts as not published', async () => {
+  const dir = await fixture({ 'package.json': { name: 'p' }, 'a.js': "require('no-versions');" });
+  await checkImports({ directoryPath: dir, update: true });
+  assert.deepEqual((await readJson(path.join(dir, 'package.json'))).checkImportsMissingDependencies, {
+    'no-versions': '?.?.?',
+  });
 });
