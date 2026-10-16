@@ -4,6 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # the types follow the oldest supported Node.js (engines), so typecheck catches a newer API
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       npm:
         patterns: ["*"]
