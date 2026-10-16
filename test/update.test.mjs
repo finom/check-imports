@@ -212,3 +212,21 @@ test('a package with no versions on the registry counts as not published', async
     'no-versions': '?.?.?',
   });
 });
+
+test('a CheckImportsError carries the results', async () => {
+  const dir = await fixture({ 'package.json': { name: 'p' }, 'a.js': "require('new-dep');" });
+  await assert.rejects(checkImports({ directoryPath: dir, throwError: true }), (error) => {
+    assert.equal(error.name, 'CheckImportsError');
+    assert.deepEqual(names(error.results[0].result.added), ['new-dep']);
+    return true;
+  });
+});
+
+test('a package.json that is not valid JSON fails with its path', async () => {
+  const dir = await fixture({ 'package.json': '{ "name": ', 'a.js': "require('new-dep');" });
+  await assert.rejects(checkImports({ directoryPath: dir }), (error) => {
+    assert.match(error.message, /package\.json is not valid JSON/);
+    assert.ok(error.message.includes(path.join(dir, 'package.json')));
+    return true;
+  });
+});

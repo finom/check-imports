@@ -37,7 +37,7 @@
     "test": "npm run build && node --test \"test/*.test.mjs\"",
     "test:coverage": "npm run build && node --test --experimental-test-coverage --test-coverage-include=\"dist/**\" --test-coverage-lines=100 --test-coverage-branches=95 --test-coverage-functions=100 \"test/*.test.mjs\"",
     "check:dist": "node scripts/check-dist.mjs",
-    "check-imports": "node dist/cli.mjs -d src -e",
+    "check-imports": "node dist/cli.mjs -e",
     "patch": "node scripts/release.mjs patch",
     "minor": "node scripts/release.mjs minor",
     "major": "node scripts/release.mjs major",
@@ -56,6 +56,7 @@
     "commander": "^15.0.0",
     "find-up": "^8.0.0",
     "glob": "^13.0.6",
+    "minimatch": "^10.2.6",
     "ts-morph": "^28.0.0"
   },
   "devDependencies": {

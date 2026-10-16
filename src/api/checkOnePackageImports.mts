@@ -1,6 +1,7 @@
 import { promises as fs } from 'node:fs';
 import chalk from 'chalk';
 import type { DependenciesKey, PackageJson } from '../types/index.mjs';
+import type { ImportedPackages } from './getGroupedDependencies.mjs';
 
 const DEFAULT_REGISTRY = 'https://registry.npmjs.org/';
 
@@ -51,11 +52,15 @@ export type CheckResult = {
   existing: DependencyInfo[];
   added: DependencyInfo[];
   removed: DependencyInfo[];
+  misplaced: DependencyInfo[];
   ignored: DependencyInfo[];
   package: PackageJson;
 };
 
 const LISTS = ['dependencies', 'peerDependencies', 'optionalDependencies', 'devDependencies'] as const;
+
+// `json-schema` → `@types/json-schema`, `@babel/core` → `@types/babel__core`
+const typesPackage = (name: string) => `@types/${name.startsWith('@') ? name.slice(1).replace('/', '__') : name}`;
 
 function serialize(pkg: PackageJson, original: string): string {
   const indent = original.match(/^[ \t]+(?=")/m)?.[0] ?? 2;
@@ -66,54 +71,91 @@ function serialize(pkg: PackageJson, original: string): string {
 
 export default async function checkOnePackageImports({
   packagePath,
-  dependencies,
+  imports,
   processManually,
   update = false,
   log = false,
 }: {
   packagePath: string;
-  dependencies: string[];
+  imports: ImportedPackages;
   processManually?: (dependency: string) => ProcessManuallyResult;
   update?: boolean;
   log?: boolean;
-}): Promise<CheckResult> {
+}): Promise<{ dependencies: string[]; result: CheckResult }> {
   const text = await fs.readFile(packagePath, 'utf8');
-  const original = JSON.parse(text) as PackageJson;
+  let original: PackageJson;
+  try {
+    original = JSON.parse(text);
+  } catch (error) {
+    throw new Error(`${packagePath} is not valid JSON: ${(error as Error).message}`, { cause: error });
+  }
   const pkg = structuredClone(original);
-  const result: CheckResult = { existing: [], added: [], removed: [], ignored: [], package: pkg };
+  const result: CheckResult = { existing: [], added: [], removed: [], misplaced: [], ignored: [], package: pkg };
 
+  // a package that only dev files import goes to devDependencies
   const decide = (dependency: string) => {
+    const defaultType = imports.get(dependency)?.runtime ? 'dependencies' : 'devDependencies';
     const decision = processManually ? processManually(dependency) : true;
-    if (typeof decision === 'boolean') return { type: 'dependencies', version: null, ignore: !decision };
+    if (typeof decision === 'boolean') return { type: defaultType, version: null, ignore: !decision };
     return {
-      type: decision.type || 'dependencies',
+      type: decision.type || defaultType,
       version: decision.version || null,
       ignore: decision.ignore ?? false,
     };
   };
 
-  const imported = dependencies.filter((dependency) => dependency !== pkg.name);
+  const isListed = (dependency: string) =>
+    LISTS.some((type) => original[type] && Object.hasOwn(original[type], dependency));
+  // an aliased name counts only when package.json lists it: the code it maps to may need the package
+  const imported = [...imports.entries()]
+    .filter(([name, { aliased }]) => name !== pkg.name && (!aliased || isListed(name)))
+    .map(([name]) => name);
   const listed = new Set<string>();
 
+  // a type-only import is also satisfied by its @types package
   for (const dependency of imported) {
-    for (const type of LISTS) {
-      const list = original[type];
-      if (list && Object.hasOwn(list, dependency)) {
-        listed.add(dependency);
-        result.existing.push({ dependency, version: list[dependency], type, ignore: false });
+    const names = imports.get(dependency)?.typeOnly ? [dependency, typesPackage(dependency)] : [dependency];
+    for (const name of names) {
+      for (const type of LISTS) {
+        const list = original[type];
+        if (list && Object.hasOwn(list, name)) {
+          listed.add(dependency);
+          result.existing.push({ dependency: name, version: list[name], type, ignore: false });
+        }
       }
     }
   }
+  const typesOfImported = new Set(imported.map(typesPackage));
 
-  // A dependency that no file imports goes, unless processManually ignores it.
+  // A dependency that no file imports goes, unless processManually ignores it; @types/x stays while x is imported.
   if (original.dependencies) {
     pkg.dependencies = {};
     for (const [dependency, version] of Object.entries(original.dependencies)) {
-      if (imported.includes(dependency) || decide(dependency).ignore) {
+      if (imported.includes(dependency) || typesOfImported.has(dependency) || decide(dependency).ignore) {
         pkg.dependencies[dependency] = version;
       } else {
         result.removed.push({ dependency, version, type: 'dependencies', ignore: false });
       }
+    }
+  }
+
+  // A runtime import listed only in devDependencies breaks the published package; a private one isn't published.
+  if (!original.private && original.devDependencies) {
+    const devDependencies = original.devDependencies;
+    const elsewhere = (dependency: string) =>
+      LISTS.some((type) => type !== 'devDependencies' && original[type] && Object.hasOwn(original[type], dependency));
+    for (const dependency of imported) {
+      if (imports.get(dependency)?.aliased || !Object.hasOwn(devDependencies, dependency) || elsewhere(dependency))
+        continue;
+      const { type, ignore } = decide(dependency);
+      if (ignore || type !== 'dependencies') continue;
+
+      const version = devDependencies[dependency];
+      result.misplaced.push({ dependency, version, type: 'devDependencies', ignore: false });
+      pkg.dependencies = { ...pkg.dependencies, [dependency]: version };
+      pkg.devDependencies = Object.fromEntries(
+        Object.entries(pkg.devDependencies ?? {}).filter(([name]) => name !== dependency),
+      );
     }
   }
 
@@ -146,5 +188,5 @@ export default async function checkOnePackageImports({
     await fs.writeFile(packagePath, serialize(pkg, text));
   }
 
-  return result;
+  return { dependencies: imported, result };
 }
