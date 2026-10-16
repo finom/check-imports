@@ -7,8 +7,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const shell = process.platform === 'win32';
-const run = (command, args, cwd) => execFileSync(command, args, { cwd, encoding: 'utf8', shell, stdio: 'pipe' }).trim();
+// npm and npx are .cmd files on Windows, which need a shell; node and tar must run without one, or their arguments split
+const run = (command, args, cwd) =>
+  execFileSync(command, args, {
+    cwd,
+    encoding: 'utf8',
+    shell: process.platform === 'win32' && (command === 'npm' || command === 'npx'),
+    stdio: 'pipe',
+  }).trim();
 const fail = (message) => {
   console.error(`check:dist: ${message}`);
   process.exit(1);
@@ -72,7 +78,7 @@ try {
       files: ['consumer.mts'],
     }),
   );
-  run(path.join(root, 'node_modules/.bin/tsc'), ['-p', dir], dir);
+  run(process.execPath, [path.join(root, 'node_modules/typescript/bin/tsc'), '-p', dir], dir);
 
   console.log(`check:dist: ${tarball} (${files.length} files) installs and runs`);
 } finally {
