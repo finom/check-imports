@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-16
+
 2.0.0 needs Node.js 22.12 or later. The options and the result keep their shape; the changes below say what behaves differently.
 
 ### Added
@@ -47,5 +49,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - The unused `@babel/parser` and `@babel/traverse` dependencies, and `npm-registry-fetch` (the built-in `fetch` replaces it). `npm audit` on a fresh install finds nothing.
 
-[Unreleased]: https://github.com/finom/check-imports/compare/v1.0.8...HEAD
+[Unreleased]: https://github.com/finom/check-imports/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/finom/check-imports/compare/v1.0.8...v2.0.0
 [1.0.8]: https://github.com/finom/check-imports/tree/v1.0.8
