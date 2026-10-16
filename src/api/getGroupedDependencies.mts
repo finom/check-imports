@@ -1,11 +1,11 @@
 import { execFile } from 'node:child_process';
-import { statSync } from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { findUp } from 'find-up';
 import { glob } from 'glob';
 import { minimatch } from 'minimatch';
 import getImportsFromFile from './getImportsFromFile.mjs';
+import { statOrNull } from './resolveAlias.mjs';
 
 const SOURCE_FILES = '**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}';
 
@@ -52,7 +52,7 @@ async function listFiles(
     };
   }
 
-  const existing = (file: string) => statSync(file, { throwIfNoEntry: false })?.isFile();
+  const existing = (file: string) => statOrNull(file)?.isFile();
   const files = gitFiles
     .filter((file) => minimatch(file, SOURCE_FILES) && !ignore.some((pattern) => minimatch(file, pattern)))
     .map((file) => path.resolve(directoryPath, file))

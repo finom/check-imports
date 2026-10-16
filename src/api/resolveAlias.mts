@@ -10,8 +10,16 @@ const EXTENSIONS = ['', '.ts', '.tsx', '.d.ts', '.js', '.jsx', '.mjs', '.cjs', '
 const configByDir = new Map<string, string | null>();
 const aliasesByConfig = new Map<string, Aliases>();
 
-const isFile = (filePath: string) => statSync(filePath, { throwIfNoEntry: false })?.isFile() ?? false;
-const exists = (filePath: string) => statSync(filePath, { throwIfNoEntry: false }) !== undefined;
+// Node 22 throws ENOTDIR for a path under a file even with `throwIfNoEntry: false`
+export const statOrNull = (filePath: string) => {
+  try {
+    return statSync(filePath);
+  } catch {
+    return null;
+  }
+};
+const isFile = (filePath: string) => statOrNull(filePath)?.isFile() ?? false;
+const exists = (filePath: string) => statOrNull(filePath) !== null;
 
 // The closest tsconfig.json or jsconfig.json above `dir`.
 function findConfig(dir: string): string | null {
@@ -31,13 +39,11 @@ function loadAliases(configPath: string, visiting = new Set<string>()): Aliases 
   if (visiting.has(configPath)) return NO_ALIASES;
   visiting.add(configPath);
 
-  // an unreadable config gives undefined, and its aliases are skipped
-  const parsed = ts.getParsedCommandLineOfConfigFile(
-    configPath,
-    {},
-    { ...ts.sys, onUnRecoverableConfigFileDiagnostic() {} },
-  );
-  const options = parsed?.options ?? {};
+  // a missing or unreadable config has no aliases
+  const { config: json, error } = ts.readConfigFile(configPath, ts.sys.readFile);
+  if (error) return NO_ALIASES;
+  const parsed = ts.parseJsonConfigFileContent(json, ts.sys, path.dirname(configPath), undefined, configPath);
+  const options = parsed.options;
   // paths are relative to baseUrl, or to the config that declares them
   const base = options.baseUrl ?? (options.pathsBasePath as string | undefined) ?? path.dirname(configPath);
 
@@ -45,7 +51,7 @@ function loadAliases(configPath: string, visiting = new Set<string>()): Aliases 
     paths: Object.entries(options.paths ?? {}).map(([pattern, targets]) => ({ pattern, targets, base })),
     baseUrls: options.baseUrl ? [options.baseUrl] : [],
   };
-  for (const reference of parsed?.projectReferences ?? []) {
+  for (const reference of parsed.projectReferences ?? []) {
     const referenced = loadAliases(ts.resolveProjectReferencePath(reference), visiting);
     aliases.paths.push(...referenced.paths);
     aliases.baseUrls.push(...referenced.baseUrls);
@@ -121,7 +127,12 @@ export default function resolveAlias(filePath: string, request: string, packageN
     .sort((a, b) => b.pattern.indexOf('*') - a.pattern.indexOf('*') || b.pattern.length - a.pattern.length)[0];
   if (best) {
     const target = best.targets
-      .map((t) => path.resolve(best.base, t.replace('*', best.captured)))
+      .map((t) =>
+        path.resolve(
+          best.base,
+          t.replaceAll('*', () => best.captured),
+        ),
+      )
       .find((t) => existingPath(t));
     if (target) return packageNameAt(target) === packageName ? null : target;
   }
