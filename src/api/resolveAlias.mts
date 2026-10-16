@@ -40,10 +40,10 @@ function loadAliases(configPath: string, visiting = new Set<string>()): Aliases 
   visiting.add(configPath);
 
   // a missing or unreadable config has no aliases
-  const { config: json, error } = ts.readConfigFile(configPath, ts.sys.readFile);
-  if (error) return NO_ALIASES;
   // TypeScript works with forward slashes, on Windows too
   const tsPath = configPath.replaceAll('\\', '/');
+  const { config: json, error } = ts.readConfigFile(tsPath, ts.sys.readFile);
+  if (error) return NO_ALIASES;
   const parsed = ts.parseJsonConfigFileContent(json, ts.sys, path.posix.dirname(tsPath), undefined, tsPath);
   const options = parsed.options;
   // paths are relative to baseUrl, or to the config that declares them
