@@ -16,7 +16,7 @@ It works with any number of `package.json` files, so a monorepo is checked in on
 npx check-imports
 ```
 
-<img src="https://i.imgur.com/NNKg1de.png" alt="Screenshot" width="500"/>
+<img src="https://raw.githubusercontent.com/finom/check-imports/master/docs/screenshot.png" alt="npx check-imports output: dependencies that remain, to add, to remove and to move" width="500"/>
 
 Requires Node.js 22.12 or later.
 
