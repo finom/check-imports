@@ -91,3 +91,55 @@ test('--throw-error exits with 0 when everything is fine', async () => {
   assert.equal(code, 0);
   assert.match(stdout, /This package\.json is fine/);
 });
+
+test('a package missing from the registry is reported', async () => {
+  const dir = await fixture({ 'package.json': { name: 'p' }, 'a.js': "require('not-published');" });
+  const { stdout } = await runCli([], { cwd: dir, env });
+  assert.match(stdout, /Package "not-published" isn't found at NPM registry/);
+});
+
+test('--json prints the result as JSON and nothing else', async () => {
+  const dir = await fixture({
+    'package.json': { name: 'p', dependencies: { unused: '1.0.0' } },
+    'a.js': "require('new-dep'); require('not-published');",
+  });
+  const { code, stdout } = await runCli(['--json'], { cwd: dir, env });
+  assert.equal(code, 0);
+  const [{ packagePath, dependencies, result }] = JSON.parse(stdout);
+  assert.equal(packagePath, path.join(dir, 'package.json'));
+  assert.deepEqual(dependencies.sort(), ['new-dep', 'not-published']);
+  assert.deepEqual(result.added.map(({ dependency }) => dependency).sort(), ['new-dep', 'not-published']);
+  assert.deepEqual(
+    result.removed.map(({ dependency }) => dependency),
+    ['unused'],
+  );
+});
+
+test('--json with --throw-error exits with 1, the result on stdout and the error on stderr', async () => {
+  const dir = await fixture({ 'package.json': { name: 'p' }, 'a.js': "require('new-dep');" });
+  const { code, stdout, stderr } = await runCli(['--json', '-e'], { cwd: dir, env });
+  assert.equal(code, 1);
+  assert.deepEqual(
+    JSON.parse(stdout)[0].result.added.map(({ dependency }) => dependency),
+    ['new-dep'],
+  );
+  assert.match(stderr, /package\.json has 1 missing dependencies \(new-dep\)/);
+});
+
+test('--json with --throw-error exits with 0 when everything is fine', async () => {
+  const dir = await fixture({
+    'package.json': { name: 'p', dependencies: { 'new-dep': '1' } },
+    'a.js': "require('new-dep');",
+  });
+  const { code, stdout, stderr } = await runCli(['--json', '-e'], { cwd: dir, env });
+  assert.equal(code, 0);
+  assert.equal(JSON.parse(stdout).length, 1);
+  assert.equal(stderr, '');
+});
+
+test('an unexpected error exits with 1 and prints its stack', async () => {
+  const dir = await fixture({ 'package.json': { name: 'p' }, 'a.js': "require('new-dep');" });
+  const { code, stderr } = await runCli([], { cwd: dir, env: { npm_config_registry: 'http://127.0.0.1:9/' } });
+  assert.equal(code, 1);
+  assert.match(stderr, /Unable to get the latest version of "new-dep"[\s\S]*\n\s+at /);
+});

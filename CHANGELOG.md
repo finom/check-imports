@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- In a git repository, files that `.gitignore` lists are skipped (build output, caches, generated code), except an ignored file that a checked file imports, which counts for the importing package. `gitignore: false` / `--no-gitignore` turns it off.
+- Aliases from the closest `tsconfig.json` or `jsconfig.json` (`paths`, `baseUrl`, through `extends` and project references) are skipped instead of reported as missing packages. A `paths` entry into a workspace package with that name is the package, and an aliased name that `package.json` lists counts as used.
+- Dev files (tests, stories, config files, scripts; `devPath` / `--dev-path`, default `DEFAULT_DEV_PATHS`): a package only they import is added to `devDependencies`. Type-only imports and `.d.ts` files count as dev.
+- `misplaced`: a package that runtime code imports but only `devDependencies` lists. `--update` moves it to `dependencies`, `throwError` fails on it. Skipped for `"private": true` packages.
+- A type-only import is satisfied by its `@types` package, and an `@types` package in `dependencies` stays while the package it types is imported.
+- `--json` prints the result as JSON. A `CheckImportsError` carries the results (`error.results`).
 - `.tsx` and `.cts` files are checked.
 - `export … from`, `import x = require()` and `` require(`pkg`) `` count as imports.
 - Exported types: `CheckImportsOptions`, `CheckImportsResult`, `ProcessManuallyResult`, `DependencyInfo`, `PackageJson`; and the `CheckImportsError` class.
@@ -34,6 +40,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The `processManually` type accepts the object form.
 - A package named like an `Object.prototype` key (`constructor`, `toString`) no longer counts as listed in every `package.json`.
 - A registry answer without `dist-tags` marks the package as not on npm instead of crashing.
+- A `package.json` that isn't valid JSON fails with its path.
+- The CLI shows the section an added package goes to when it isn't `"dependencies"`.
 
 ### Removed
 

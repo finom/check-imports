@@ -69,3 +69,20 @@ export function runCli(args, { cwd, env = {} } = {}) {
 }
 
 export const names = (list) => list.map(({ dependency }) => dependency).sort();
+
+// Makes `dir` a git repo; `commit` lists files to commit, the rest stays untracked.
+export async function gitInit(dir, commit = []) {
+  const git = (...args) =>
+    new Promise((resolve, reject) =>
+      execFile('git', args, { cwd: dir }, (error, stdout) => (error ? reject(error) : resolve(stdout))),
+    );
+  await git('init', '-q');
+  await git('config', 'user.email', 'test@example.com');
+  await git('config', 'user.name', 'test');
+  await git('config', 'core.excludesFile', '');
+  if (commit.length) {
+    await git('add', '--', ...commit);
+    await git('commit', '-qm', 'init');
+  }
+  return git;
+}
