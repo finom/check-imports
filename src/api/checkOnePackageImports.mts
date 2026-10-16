@@ -7,7 +7,11 @@ const DEFAULT_REGISTRY = 'https://registry.npmjs.org/';
 // The latest version on the registry npm uses (`npm_config_registry`), or null when the package has none there.
 async function getLatestVersion(dependency: string): Promise<string | null> {
   const registry = process.env.npm_config_registry || DEFAULT_REGISTRY;
-  const url = new URL(dependency.replace('/', '%2f'), registry.endsWith('/') ? registry : `${registry}/`);
+  // `@scope/name` → `@scope%2Fname`, the form npm itself requests
+  const path = dependency.startsWith('@')
+    ? `@${encodeURIComponent(dependency.slice(1))}`
+    : encodeURIComponent(dependency);
+  const url = new URL(path, registry.endsWith('/') ? registry : `${registry}/`);
   const headers: Record<string, string> = {
     accept: 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8',
   };
