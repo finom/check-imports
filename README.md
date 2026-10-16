@@ -16,23 +16,7 @@ It works with any number of `package.json` files, so a monorepo is checked in on
 npx check-imports
 ```
 
-```text
-/home/me/my-app/package.json
-2 dependencies remain
-- express@^5.1.0 (dependencies)
-- zod@^4.1.0 (devDependencies)
-2 dependencies to add
-- lodash@^4.18.1
-- vitest@^5.0.5 (devDependencies)
-1 dependencies to remove
-- moment@^2.30.1
-1 dependencies to move to "dependencies"
-- zod@^4.1.0
-0 dependencies ignored
-This package.json can be automatically updated with the --update option
-```
-
-Here `src/index.ts` imports `express`, `zod` and `lodash/pick`, and `test/index.test.ts` imports `vitest`.
+<img src="https://raw.githubusercontent.com/finom/check-imports/master/docs/screenshot.png" alt="npx check-imports output: dependencies that remain, to add, to remove and to move" width="500"/>
 
 Requires Node.js 22.12 or later.
 
