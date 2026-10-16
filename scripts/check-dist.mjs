@@ -22,7 +22,7 @@ try {
   const { version } = JSON.parse(
     run('npm', ['pkg', 'get', 'version', '--json'], root).replace(/^"(.*)"$/, '{"version":"$1"}'),
   );
-  const files = run('tar', ['-tzf', path.join(dir, tarball)], dir).split('\n');
+  const files = run('tar', ['-tzf', path.join(dir, tarball)], dir).split(/\r?\n/);
   const outside = files.filter(
     (file) => !/^package\/(dist\/|package\.json$|README\.md$|LICENSE$|CHANGELOG\.md$)/.test(file),
   );
