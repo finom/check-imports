@@ -1,112 +1,136 @@
-# check-imports [![npm version](https://badge.fury.io/js/check-imports.svg)](https://badge.fury.io/js/check-imports) [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](https://www.typescriptlang.org)
+# check-imports [![npm version](https://img.shields.io/npm/v/check-imports.svg)](https://www.npmjs.com/package/check-imports) [![CI](https://github.com/finom/check-imports/actions/workflows/ci.yml/badge.svg)](https://github.com/finom/check-imports/actions/workflows/ci.yml)
 
+Reads the imports of a JavaScript or TypeScript project and reports, for each `package.json`:
 
-Checks `import from` declarations, `import` and `require` calls in your code and reports if:
+- dependencies listed in `"dependencies"` that no file imports;
+- packages that files import but no section of the closest `package.json` lists.
 
-- Dependency is listed at package.json but never used at the folder relative to the package.json file.
-- A module is imported but dependency isn't listed at the closest package.json.
+With `--update` it fixes `package.json`: adds the missing packages at their latest version and removes the unused ones.
 
-With `--update` option updates dependencies automatically (adds missing, removes unused).
-
-Originally created for monorepos but can be used with any nested project structure with one or multiple package.json files.
+It works with any number of `package.json` files, so a monorepo is checked in one run.
 
 ## TL;DR
 
-`npx check-imports`
+```sh
+npx check-imports
+```
 
 <img src="https://i.imgur.com/NNKg1de.png" alt="Screenshot" width="500"/>
 
+Requires Node.js 22.12 or later.
 
 ## How it works
 
-1. The library gets all .js, .jsx, .ts, .mjs, .mts, .cjs files from CWD or directory relative to CWD that's defined with `-d` flag;
-2. Builds AST via [ts-morph](https://www.npmjs.com/package/ts-morph) and retrieves import paths from `import from`, `require()`, `import()`;
-3. Runs the following filtering and mapping:
-    1. Ignore relative paths;
-    2. Ignore built-in NodeJS modules such as `node:path`, `path`, `node:fs`, `fs`, etc;
-    3. Retrieve module names (`lodash/pick` becomes `lodash`);
-    4. Retrieve module names from scoped packages (`@scope/module/foo/bar` becomes `@scope/module`);
-    5. Get rid of Webpack syntax (`foo!bar!baz?quux=bat&xyzzy=plugh` becomes `baz`);
-4. Finds a closest package.json file relative to the file with import;
-5. Compares its contents with the retrieved list of imports and if `update` option is set to `true` the script updates it.
-    1. If `ignore` option is provided then `"dependencies"` aren't going to be updated with a given dependency or multiple dependencies;
-    2. If a dependency already exists either at `"dependencies"`, `"optionalDependencies"`, `"devDependencies"` or `"peerDependencies"` then `"dependencies"` aren't going to be updated and a dependency version remains the same;
-    3. If none of these two, a dependency of a latest version is retrieved from NPM registry and going to be added to `"dependencies"`.
+1. Finds the `.js`, `.jsx`, `.ts`, `.tsx`, `.mjs`, `.cjs`, `.mts` and `.cts` files in the directory (the current one, or `-d`), skipping `node_modules`.
+2. Parses each file with the TypeScript parser ([ts-morph](https://www.npmjs.com/package/ts-morph)), JSX included, and collects the specifiers of `import … from`, `import()`, `require()`, `export … from` and `import x = require()`. A specifier counts only when it is a string literal.
+3. Turns each specifier into a package name:
+    1. `lodash/pick` becomes `lodash`, `@scope/pkg/foo` becomes `@scope/pkg`;
+    2. webpack syntax goes: `style-loader!css-loader!pkg?query` becomes `pkg`;
+    3. skipped: relative and absolute paths, Node.js built-ins (`fs`, `node:test`), URLs, subpath imports (`#internal`), aliases that can't be npm names (`@/components`, `~/utils`), and the package's own name.
+4. Groups the names by the closest `package.json` of each file.
+5. Compares each group with its `package.json`:
+    1. a package listed in `"dependencies"`, `"devDependencies"`, `"peerDependencies"` or `"optionalDependencies"` is present, and its version stays;
+    2. a package listed nowhere is missing; with `--update` it is added to `"dependencies"` at `^<latest version>`, read from the registry npm uses (`npm_config_registry`, or registry.npmjs.org). A package the registry doesn't have goes to `"checkImportsMissingDependencies"` with the version `?.?.?`;
+    3. a package in `"dependencies"` that no file imports is unused; with `--update` it is removed.
 
-After an update you still need to run `npm install` manually.
+`--update` keeps the file's indentation and final newline, and doesn't touch a `package.json` that needs no change. Run `npm install` afterwards.
 
-Bonus: imports can be ignored directly in code via `check-imports-ignore-line` comment.
+For a private registry, set `NPM_TOKEN`; it is sent as a bearer token.
+
+### Ignoring an import
+
+A `check-imports-ignore-line` comment ignores the imports on its line. On a line of its own, it ignores the next line.
 
 ```js
 require('lodash'); // check-imports-ignore-line
+
+// check-imports-ignore-line
+import foo from 'foo';
 ```
 
 ## CLI
 
-The tool can be run via `npx check-imports`.
-
-### Options
-- `-u`, `--update` - update parent package.json files.
-- `-e`, `--throw-error` - exit process with code 1 in case if there are redundant or missing dependencies (good for CI).
-- `-d`, `--directory-path <value>` - a directory where JavaScript/TypeScript/JSX files are located.
-- `--ignore-path <items>` - a glob pattern (or coma-delimited patterns) to ignore processed files (`--ignore-path "**/foo/*.js"`).
-- `-n`, `--ignore-imports <items>` - a comma-delimited list of dependencies that don't need to appear at `"dependencies"`.
-
-
-## API
-```js
-import checkImports from 'check-imports';
+```sh
+npx check-imports [options]
 ```
 
-The API includes a bit wider set of options. It allows to map dependencies to check if a dependency needs to be ignored or get a wanted version.
+- `-d`, `--directory-path <path>`: the directory to check. Default: the current one.
+- `-u`, `--update`: update the `package.json` files.
+- `-e`, `--throw-error`: exit with code 1 when a `package.json` has missing or unused dependencies (for CI). The result is printed first.
+- `-n`, `--ignore-imports <names>`: comma-separated packages to leave alone: never added, never removed (`-n react,tslib`).
+- `--ignore-path <globs>`: comma-separated globs of files to skip, relative to the directory (`--ignore-path "legacy/**,**/*.test.js"`).
+- `-V`, `--version`, `-h`, `--help`.
+
+## API
 
 ```js
+import checkImports from 'check-imports';
+
 const results = await checkImports(options);
 ```
 
 ### Options
-- `update = false` - either update package.json files or not.
-- `throwError = false` - throw an error in case if there are redundant or missing dependencies
-- `log = false` - print CLI output
-- `directoryPath = process.cwd()` - a directory where JavaScript/TypeScript/JSX files are located.
-- `ignorePath = []` - a glob pattern or an array of patterns to ignore processed files.
-- `processManually = null` - a function which is run agains every found import. You may want to define it in case if you want to ignore some dependencies or set a wanted version. It should return either of the following values:
-    - `true` - process a dependency a regular way.
-    - `false` - ignore a dependency.
-    - An object with optional keys `version` and `type`. `version` field makes possible to forcibly define a dependency version. `type` field defines a key at package.json where a dependency needs to be stored (`"optionalDependencies"`, `"peerDependencies"` or any custom). By default its value is `"dependencies"`.
+
+- `directoryPath = process.cwd()`: the directory to check.
+- `update = false`: update the `package.json` files.
+- `throwError = false`: after checking every `package.json`, throw a `CheckImportsError` that lists each one with missing or unused dependencies. With `update`, the files are written first.
+- `log = false`: print the result, as the CLI does.
+- `ignorePath = []`: a glob or an array of globs of files to skip, relative to `directoryPath`.
+- `processManually`: a function called with each package name: every imported package missing from `package.json`, and every unused one in `"dependencies"`. It returns:
+    - `true`: handle the package the regular way;
+    - `false`: leave it alone: an imported one isn't added (it shows in `ignored`), an unused one isn't removed;
+    - an object with optional `version` and `type`: `version` sets the version instead of the latest one, `type` sets the section it goes to (`"peerDependencies"`, `"optionalDependencies"` or any custom key). The default type is `"dependencies"`.
 
 ```js
 const results = await checkImports({
-  directoryPath: path.resolve(__dirname, 'foo'),
+  directoryPath: path.resolve(import.meta.dirname, 'foo'),
   ignorePath: ['**/ignored.*'],
   processManually: (dependency) => {
     if (dependency === 'react') {
-      // forcibly set version to 1.1.1 and add it to peerDependencies
-      return {
-        version: '1.1.1',
-        type: 'peerDependencies',
-      };
+      // add it to peerDependencies with this version
+      return { version: '>=18', type: 'peerDependencies' };
     }
     if (dependency === 'react-redux') {
-      // add it to customDependencies
-      return {
-        type: 'customDependencies',
-      };
+      // add it to customDependencies at the latest version
+      return { type: 'customDependencies' };
     }
     if (dependency === 'moment') {
-      // forcibly set version to ^999.999.999
-      return {
-        version: '^999.999.999',
-      };
+      // add it at this version
+      return { version: '^2.30.0' };
     }
     if (dependency === 'redux') {
-      // ignore the dependency
+      // leave it alone
       return false;
     }
 
-    // else process regularly
     return true;
   },
   update: true,
 });
 ```
+
+### Result
+
+An array with one item per `package.json`:
+
+```ts
+{
+  packagePath: string; // the package.json
+  dependencies: string[]; // the package names its files import
+  result: {
+    existing: DependencyInfo[]; // imported and listed
+    added: DependencyInfo[]; // imported, not listed
+    removed: DependencyInfo[]; // in "dependencies", not imported
+    ignored: DependencyInfo[]; // imported, left alone by processManually
+    package: PackageJson; // the package.json as it is after the check
+  };
+}
+
+type DependencyInfo = { dependency: string; version: string | null; type: string; ignore: boolean };
+```
+
+The types (`CheckImportsOptions`, `CheckImportsResult`, `ProcessManuallyResult`, `DependencyInfo`, `PackageJson`) are exported.
+
+## License
+
+MIT

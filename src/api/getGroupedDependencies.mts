@@ -1,57 +1,35 @@
-import { findUp } from "find-up";
-import path from "path";
-import { glob } from "glob";
-import getImportsFromFile from "./getImportsFromFile.mjs";
+import path from 'node:path';
+import { findUp } from 'find-up';
+import { glob } from 'glob';
+import getImportsFromFile from './getImportsFromFile.mjs';
 
-type GetGroupedDependenciesOptions = {
-  directoryPath: string;
-  ignorePath?: string | string[];
-  throwError?: boolean;
-  log?: boolean;
-};
-
+// Imported package names per package.json path, each file counted for its closest package.json.
 export default async function getGroupedDependencies({
   directoryPath,
-  ignorePath,
-  throwError = false,
-  log = false,
-}: GetGroupedDependenciesOptions): Promise<Record<string, Record<string, boolean>>> {
-  const filePaths = await glob(path.resolve(directoryPath, "**/*.{ts,js,jsx,mts,mjs,cjs}"), {
-    ignore: [
-      "**/node_modules/**",
-      ...(typeof ignorePath === "string" ? [ignorePath] : ignorePath || []),
-    ],
+  ignorePath = [],
+}: {
+  directoryPath: string;
+  ignorePath?: string | string[];
+}): Promise<Record<string, string[]>> {
+  const filePaths = await glob('**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}', {
+    cwd: directoryPath,
+    absolute: true,
+    nodir: true,
+    ignore: ['**/node_modules/**', ...(typeof ignorePath === 'string' ? [ignorePath] : ignorePath)],
   });
 
-  const groups: Record<string, Record<string, boolean>> = {};
-  const groupedDependencies: Record<string, Record<string, boolean>> = {};
+  const packagePaths = new Map<string, Promise<string | undefined>>();
+  const groups: Record<string, Set<string>> = {};
 
-  for (const filePath of filePaths) {
+  for (const filePath of filePaths.sort()) {
     const dirname = path.dirname(filePath);
-    const packagePath = await findUp("package.json", { cwd: dirname });
+    if (!packagePaths.has(dirname)) packagePaths.set(dirname, findUp('package.json', { cwd: dirname }));
+    const packagePath = await packagePaths.get(dirname);
+    if (!packagePath) continue;
 
-    if (packagePath) {
-      groups[packagePath] = groups[packagePath] || {};
-      groups[packagePath][filePath] = true;
-    }
+    groups[packagePath] ??= new Set();
+    for (const name of await getImportsFromFile(filePath)) groups[packagePath].add(name);
   }
 
-  for (const [packagePath, filesGroup] of Object.entries(groups)) {
-    const deps: Record<string, boolean> = {};
-    groupedDependencies[packagePath] = deps;
-
-    for (const filePath of Object.keys(filesGroup)) {
-      const imports = await getImportsFromFile({
-        filePath,
-        throwError,
-        log,
-      });
-
-      for (const imp of imports) {
-        deps[imp] = true;
-      }
-    }
-  }
-
-  return groupedDependencies;
+  return Object.fromEntries(Object.entries(groups).map(([packagePath, names]) => [packagePath, [...names]]));
 }

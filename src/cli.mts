@@ -1,52 +1,43 @@
 #!/usr/bin/env node
-import { Command } from 'commander';
+import path from 'node:path';
 import chalk from 'chalk';
-import pkg from '../package.json' with { type: "json" };
-import checkImports from './api/index.mjs';
+import { Command } from 'commander';
+import pkg from '../package.json' with { type: 'json' };
+import checkImports, { CheckImportsError } from './api/index.mjs';
 
-const program = new Command();
+const list = (value: string) =>
+  value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
 
-program
+const program = new Command()
   .version(pkg.version)
-  .option('-n, --ignore-imports <items>', 'ignored packages')
-  .option('-d, --directory-path <value>', 'working directory path')
-  .option('--ignore-path <items>', 'a glob pattern to ignore processed files')
-  .option('-u, --update', 'update package.json files')
-  .option(
-    '-e, --throw-error',
-    'exit process with code 1 if there are redundant or missing dependencies',
-  )
+  .option('-n, --ignore-imports <items>', 'comma-separated dependencies to leave alone', list, [])
+  .option('-d, --directory-path <value>', 'directory to check', '.')
+  .option('--ignore-path <items>', 'comma-separated globs of files to skip, relative to the directory', list, [])
+  .option('-u, --update', 'update package.json files', false)
+  .option('-e, --throw-error', 'exit with code 1 if there are missing or unused dependencies', false)
+  .parse();
 
-program.parse(process.argv);
+const { ignoreImports, directoryPath, ignorePath, update, throwError } = program.opts<{
+  ignoreImports: string[];
+  directoryPath: string;
+  ignorePath: string[];
+  update: boolean;
+  throwError: boolean;
+}>();
 
-type RunOptions = {
-  ignoreImports?: string[];
-  ignorePath?: string | string[];
-  directoryPath?: string;
-  update?: boolean;
-  throwError?: boolean;
-};
-
-async function run({
-  ignoreImports = [],
-  ignorePath = [],
-  directoryPath = '.',
-  update = false,
-  throwError = false,
-}: RunOptions) {
-  return checkImports({
+try {
+  await checkImports({
     log: true,
-    directoryPath,
+    directoryPath: path.resolve(directoryPath),
     ignorePath,
     update,
     throwError,
-    processManually(dependency: string) {
-      return !ignoreImports.includes(dependency);
-    },
+    processManually: (dependency) => !ignoreImports.includes(dependency),
   });
+} catch (error) {
+  console.error(chalk.red(error instanceof CheckImportsError ? error.message : ((error as Error).stack ?? error)));
+  process.exitCode = 1;
 }
-
-run(program.opts()).catch((e) => {
-  console.log(chalk.red(e.stack));
-  process.exit(1);
-});
