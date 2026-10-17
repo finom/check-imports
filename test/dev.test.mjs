@@ -108,7 +108,7 @@ test('throwError fails on a misplaced dependency', async () => {
   });
   await assert.rejects(
     checkImports({ directoryPath: dir, throwError: true }),
-    /package\.json has 1 dependencies to move to "dependencies" \(zod\)/,
+    /package\.json has 1 dependency to move from devDependencies to dependencies \(zod\)/,
   );
 });
 
@@ -141,7 +141,7 @@ test('the CLI prints misplaced dependencies and where added ones go', async () =
   });
   const { stdout } = await runCli([], { cwd: dir, env: { npm_config_registry: registry.url } });
   assert.match(stdout, /2 dependencies to add\n- lodash@\^4\.17\.21\n- vitest@\^4\.0\.0 \(devDependencies\)\n/);
-  assert.match(stdout, /1 dependencies to move to "dependencies"\n- zod@1\.0\.0/);
+  assert.match(stdout, /1 dependency to move from devDependencies to dependencies\n- zod@1\.0\.0/);
   assert.match(stdout, /can be automatically updated/);
 });
 

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- The output says "1 dependency" for one, and the misplaced section reads "to move from devDependencies to dependencies"; so does the `-e` error.
+
 ## [2.0.0] - 2026-10-16
 
 2.0.0 needs Node.js 22.12 or later. The options and the result keep their shape; the changes below say what behaves differently.
