@@ -1,6 +1,6 @@
 {
   "name": "check-imports",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Finds missing, unused and misplaced dependencies by reading the imports of a JavaScript or TypeScript project, monorepos included",
   "keywords": [
     "dependencies",

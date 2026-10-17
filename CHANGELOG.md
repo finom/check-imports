@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-10-17
+
 ### Fixed
 
 - The output says "1 dependency" for one, and the misplaced section reads "to move from devDependencies to dependencies"; so does the `-e` error.
@@ -53,6 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - The unused `@babel/parser` and `@babel/traverse` dependencies, and `npm-registry-fetch` (the built-in `fetch` replaces it). `npm audit` on a fresh install finds nothing.
 
-[Unreleased]: https://github.com/finom/check-imports/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/finom/check-imports/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/finom/check-imports/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/finom/check-imports/compare/v1.0.8...v2.0.0
 [1.0.8]: https://github.com/finom/check-imports/tree/v1.0.8
