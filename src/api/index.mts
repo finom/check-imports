@@ -1,6 +1,7 @@
 import checkOnePackageImports, { type CheckResult, type ProcessManuallyResult } from './checkOnePackageImports.mjs';
 import getGroupedDependencies, { DEFAULT_DEV_PATHS } from './getGroupedDependencies.mjs';
 import logResults from './logResults.mjs';
+import countDependencies from './countDependencies.mjs';
 
 export type { DependenciesKey, PackageJson } from '../types/index.mjs';
 export type { CheckResult, DependencyInfo, ProcessManuallyResult } from './checkOnePackageImports.mjs';
@@ -66,15 +67,13 @@ export default async function checkImports({
     const problems = results.flatMap(({ packagePath, result }) =>
       (
         [
-          [result.added, 'missing dependencies'],
-          [result.removed, 'dependencies to remove'],
-          [result.misplaced, 'dependencies to move to "dependencies"'],
+          [result.added, (n: number) => countDependencies(n, 'missing')],
+          [result.removed, (n: number) => `${countDependencies(n)} to remove`],
+          [result.misplaced, (n: number) => `${countDependencies(n)} to move from devDependencies to dependencies`],
         ] as const
       )
         .filter(([list]) => list.length)
-        .map(
-          ([list, what]) => `${packagePath} has ${list.length} ${what} (${list.map((d) => d.dependency).join(', ')})`,
-        ),
+        .map(([list, what]) => `${packagePath} has ${what(list.length)} (${list.map((d) => d.dependency).join(', ')})`),
     );
     if (problems.length) throw new CheckImportsError(problems.join('\n'), results);
   }

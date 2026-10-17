@@ -26,9 +26,32 @@ test('checks the current directory by default and prints the result', async () =
   });
   const { code, stdout } = await runCli([], { cwd: dir, env });
   assert.equal(code, 0);
-  assert.match(stdout, /1 dependencies to add\n- new-dep@\^2\.3\.4/);
-  assert.match(stdout, /1 dependencies to remove\n- unused@1\.0\.0/);
+  assert.match(stdout, /1 dependency to add\n- new-dep@\^2\.3\.4/);
+  assert.match(stdout, /1 dependency to remove\n- unused@1\.0\.0/);
   assert.match(stdout, /can be automatically updated with the --update option/);
+});
+
+test('counts say dependency for one and dependencies for any other number', async () => {
+  const dir = await fixture({
+    'package.json': { name: 'p', dependencies: { a: '1.0.0' }, devDependencies: { b: '1.0.0', c: '1.0.0' } },
+    'index.js': "require('a'); require('b'); require('c');",
+  });
+  const one = await runCli([], { cwd: dir, env });
+  assert.match(one.stdout, /3 dependencies remain\n/);
+  assert.match(one.stdout, /0 dependencies to add\n0 dependencies to remove\n/);
+  assert.match(one.stdout, /2 dependencies to move from devDependencies to dependencies\n- b@1\.0\.0\n- c@1\.0\.0\n/);
+  assert.match(one.stdout, /0 dependencies ignored\n/);
+
+  const single = await fixture({
+    'package.json': { name: 'p', dependencies: { a: '1.0.0' } },
+    'index.js': "require('a');",
+  });
+  const { stdout } = await runCli([], { cwd: single, env });
+  assert.match(stdout, /1 dependency remains\n- a@1\.0\.0 \(dependencies\)\n/);
+
+  const error = await runCli(['-e'], { cwd: dir, env });
+  assert.equal(error.code, 1);
+  assert.match(error.stderr, /package\.json has 2 dependencies to move from devDependencies to dependencies \(b, c\)/);
 });
 
 test('--update writes package.json', async () => {
@@ -70,15 +93,15 @@ test('--ignore-path takes a comma-separated list of globs', async () => {
     'gen/c.js': "require('redux');",
   });
   const { stdout } = await runCli(['--ignore-path', 'legacy/**,gen/**'], { cwd: dir, env });
-  assert.match(stdout, /1 dependencies to add\n- new-dep/);
+  assert.match(stdout, /1 dependency to add\n- new-dep/);
 });
 
 test('--throw-error exits with 1 and still prints the result', async () => {
   const dir = await fixture({ 'package.json': { name: 'p' }, 'a.js': "require('new-dep');" });
   const { code, stdout, stderr } = await runCli(['-e'], { cwd: dir, env });
   assert.equal(code, 1);
-  assert.match(stdout, /1 dependencies to add\n- new-dep/);
-  assert.match(stdout + stderr, /package\.json has 1 missing dependencies \(new-dep\)/);
+  assert.match(stdout, /1 dependency to add\n- new-dep/);
+  assert.match(stdout + stderr, /package\.json has 1 missing dependency \(new-dep\)/);
   assert.doesNotMatch(stdout + stderr, /\n\s+at /, 'no stack trace for a failed check');
 });
 
@@ -123,7 +146,7 @@ test('--json with --throw-error exits with 1, the result on stdout and the error
     JSON.parse(stdout)[0].result.added.map(({ dependency }) => dependency),
     ['new-dep'],
   );
-  assert.match(stderr, /package\.json has 1 missing dependencies \(new-dep\)/);
+  assert.match(stderr, /package\.json has 1 missing dependency \(new-dep\)/);
 });
 
 test('--json with --throw-error exits with 0 when everything is fine', async () => {

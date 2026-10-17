@@ -155,8 +155,8 @@ test('throwError rejects after checking every package and names each problem', a
     'c/x.js': '',
   });
   await assert.rejects(checkImports({ directoryPath: dir, throwError: true }), (error) => {
-    assert.match(error.message, /a[/\\]package\.json has 1 dependencies to remove \(unused\)/);
-    assert.match(error.message, /b[/\\]package\.json has 1 missing dependencies \(new-dep\)/);
+    assert.match(error.message, /a[/\\]package\.json has 1 dependency to remove \(unused\)/);
+    assert.match(error.message, /b[/\\]package\.json has 1 missing dependency \(new-dep\)/);
     assert.doesNotMatch(error.message, /c[/\\]package\.json/);
     return true;
   });
