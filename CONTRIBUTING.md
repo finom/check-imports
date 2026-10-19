@@ -23,7 +23,7 @@ CI runs all of them on Linux, macOS and Windows, with Node.js 22.12 and 24.
 
 ## Tests
 
-New behavior comes with tests, and a bug fix comes with a test that fails without the fix. Tests live in `test/*.test.mjs` and build their projects as temporary fixtures, with a local fake registry, so they need no network.
+New behavior comes with tests, and a bug fix comes with a test that fails without the fix. Tests live in `test/*.test.mjs` (property tests in `test/*.test.js`) and build their projects as temporary fixtures, with a local fake registry, so they need no network.
 
 ## Changes
 
