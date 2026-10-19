@@ -1,4 +1,4 @@
-# check-imports [![npm version](https://img.shields.io/npm/v/check-imports.svg)](https://www.npmjs.com/package/check-imports) [![CI](https://github.com/finom/check-imports/actions/workflows/ci.yml/badge.svg)](https://github.com/finom/check-imports/actions/workflows/ci.yml)
+# check-imports [![npm version](https://img.shields.io/npm/v/check-imports.svg)](https://www.npmjs.com/package/check-imports) [![CI](https://github.com/finom/check-imports/actions/workflows/ci.yml/badge.svg)](https://github.com/finom/check-imports/actions/workflows/ci.yml) [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15698/badge)](https://www.bestpractices.dev/projects/15698)
 
 Reads the imports of a JavaScript or TypeScript project and reports, for each `package.json`:
 
